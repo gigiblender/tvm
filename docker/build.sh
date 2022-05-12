@@ -165,7 +165,7 @@ function upsearch () {
 # Set up WORKSPACE and BUILD_TAG. Jenkins will set them for you or we pick
 # reasonable defaults if you run it outside of Jenkins.
 WORKSPACE="${WORKSPACE:-${SCRIPT_DIR}/../}"
-BUILD_TAG="${BUILD_TAG:-tvm}"
+BUILD_TAG=$(echo "${BUILD_TAG:-tvm}" | sed 's/-/--/g' | sed 's/%/-/g')
 DOCKER_IMAGE_TAG="${DOCKER_IMAGE_TAG:-latest}"
 
 # Determine the docker image name
