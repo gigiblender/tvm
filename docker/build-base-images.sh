@@ -17,7 +17,7 @@ for docker_file in "${IMAGES[@]}"; do
     git check-ignore "${docker_file}" && continue || /bin/true
     arch=${docker_file#"$(dirname $0)/Dockerfile.base_"}
     echo "Building base image for architecture ${arch}"
-    $(dirname $0)/build.sh "base_${arch}" --platform "${arch}"
+    $(dirname $0)/build.sh "base_${arch}"  # --platform "${arch}"
 
     # NOTE: working dir inside docker is repo root.
     $(dirname $0)/bash.sh -it "tvm.base_${arch}:latest" python3 docker/freeze_deps.py \
