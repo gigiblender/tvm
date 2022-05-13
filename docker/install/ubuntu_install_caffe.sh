@@ -34,7 +34,7 @@ cd /caffe_src
 
 echo "Building Caffe"
 mkdir /caffe_src/build && cd /caffe_src/build
-. /virtualenv/tvm/apache-tvm-py3.7/bin/activate
+. /virtualenv/apache-tvm-py3.7/bin/activate
 cmake -DCMAKE_INSTALL_PREFIX=${CAFFE_HOME}\
     -DCMAKE_BUILD_TYPE=Release \
     -DCPU_ONLY=1 \
