@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-17T17:26:21.660243
+// Generated at 2022-05-13T17:17:54.888804
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -398,11 +398,11 @@ if (rebuild_docker_images) {
 
     // TODO in a follow up PR: Find ecr tag and use in subsequent builds
     parallel(
-       'arm64': {
+       'aarch64': {
         node('ARM') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_base_image('arm64')
+            build_base_image('aarch64')
           }
         }
       },
@@ -429,7 +429,7 @@ if (rebuild_docker_images) {
         node('ARM') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('arm64', 'ci_arm')
+            build_image('aarch64', 'ci_arm')
           }
         }
       },
