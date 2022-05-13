@@ -6,7 +6,7 @@
 #keras = "^2.6.0"
 #mxnet = "^1.6.0"
 
-black = "==22.3.0"
+black = "<21.8b0"  # Breaks tensorflow-gpu. Revisit when tensorflow is upgraded.
 blocklint = "==0.2.3"
 #commonmark = ">=0.7.3"
 cpplint = "==1.6.0"
