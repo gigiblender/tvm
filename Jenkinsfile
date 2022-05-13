@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-13T17:17:54.888804
+// Generated at 2022-05-13T17:18:01.320189
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -332,9 +332,9 @@ def build_base_image(arch_name) {
     script: "docker/build-base-images.sh ${arch_name}",
     label: "Build base image for ${arch_name}"
   )
-  archiveArtifacts artifacts: 'docker/build/base_${arch_name}/**', fingerprint: true
-  def files = findFiles(glob: 'docker/build/base_${arch_name}/**')
-  pack_lib('${arch_name}-lockfiles', files.join(', '))
+  archiveArtifacts artifacts: "docker/build/base_${arch_name}/**", fingerprint: true
+  def files = findFiles(glob: "docker/build/base_${arch_name}/**")
+  pack_lib("${arch_name}-lockfiles", files.join(', '))
 }
 
 def build_image(arch_name, image_name) {
@@ -343,7 +343,7 @@ def build_image(arch_name, image_name) {
     script: 'git log -1 --format=\'%h\''
   ).trim()
   def full_name = "${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}"
-  unpack_lib('${arch_name}-lockfiles')
+  unpack_lib("${arch_name}-lockfiles")
   sh(
     script: "${docker_build} ${image_name} --spec ${full_name}",
     label: 'Build docker image'
