@@ -20,7 +20,8 @@ for docker_file in "${IMAGES[@]}"; do
     $(dirname $0)/build.sh "base_${arch}"  # --platform "${arch}"
 
     # NOTE: working dir inside docker is repo root.
-    $(dirname $0)/bash.sh -i "tvm.base_${arch}:latest" python3 docker/freeze_deps.py \
+    BUILD_TAG=$(echo "${BUILD_TAG:-tvm}" | sed 's/-/--/g' | sed 's/%/-/g')
+    $(dirname $0)/bash.sh -i "${BUILD_TAG}.base_${arch}:latest" python3 docker/freeze_deps.py \
                  --ci-constraints=docker/ci-constraints.txt \
                  --gen-requirements-py=python/gen_requirements.py \
                  --template-pyproject-toml=pyproject.toml \
