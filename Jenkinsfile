@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-13T17:18:01.320189
+// Generated at 2022-05-13T17:18:06.158241
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -323,18 +323,21 @@ stage('Lint') {
 // a method (so the code can't all be inlined)
 lint()
 
-def build_base_image(arch_name) {
+def freeze_python_deps() {
   hash = sh(
     returnStdout: true,
     script: 'git log -1 --format=\'%h\''
   ).trim()
   sh(
-    script: "docker/build-base-images.sh ${arch_name}",
-    label: "Build base image for ${arch_name}"
+    script: "docker/build.sh ci_py_deps",
+    label: "Build image for ci_py_deps"
+  )
+  sh(
+    script: "docker/python/freeze-dependencies.sh",
+    label: "Build image for ci_py_deps"
   )
   archiveArtifacts artifacts: "docker/build/base_${arch_name}/**", fingerprint: true
-  def files = findFiles(glob: "docker/build/base_${arch_name}/**")
-  pack_lib("${arch_name}-lockfiles", files.join(', '))
+  pack_lib("${arch_name}-lockfiles", "docker/python/build/**")
 }
 
 def build_image(arch_name, image_name) {
