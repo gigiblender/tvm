@@ -32,6 +32,6 @@ ENV RUSTUP_HOME /opt/rust
 ENV CARGO_HOME /opt/rust
 ENV PATH $PATH:$CARGO_HOME/bin
 
-COPY python/bootstrap-requirements.txt /install/python/bootstrap-requirements.txt
+COPY python/bootstrap-requirements-x86.txt /install/python/bootstrap-requirements.txt
 COPY install/ubuntu1804_install_python.sh /install/ubuntu1804_install_python.sh
 RUN bash /install/ubuntu1804_install_python.sh
