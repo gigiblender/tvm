@@ -16,12 +16,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-set -e
-set -u
-set -o pipefail
+set -euo pipefail
+set -x
 
 cd $(dirname $0)/python
 poetry config cache-dir /tmp/poetry-cache
-poetry config virtualenvs.create false
-poetry config virtualenvs.path /virtualenv/tvm
-poetry install --no-root
+poetry config virtualenvs.path /virtualenv
+
+poetry install --no-root "$@"
+VENV_ROOT=$(ls -d1 /virtualenv/apache-tvm-*-py3.7)
+ln -s "${VENV_ROOT}" /virtualenv/apache-tvm-py3.7
