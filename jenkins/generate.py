@@ -34,7 +34,7 @@ data = {
     "images": [
         {
             "name": "ci_arm",
-            "arch": "arm64",
+            "arch": "aarch64",
             "platform": "ARM",
         },
         {
