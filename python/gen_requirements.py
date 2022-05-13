@@ -147,6 +147,15 @@ REQUIREMENTS_BY_PIECE: RequirementsByPieceType = [
         ),
     ),
     (
+        "importer-mxnet",
+        (
+            "Requirements for the mxnet importer",
+            [
+                "mxnet",
+            ],
+        ),
+    ),
+    (
         "importer-paddle",
         ("Requirements for the PaddlePaddle importer", ["paddlepaddle"]),
     ),
@@ -273,6 +282,7 @@ CONSTRAINTS = [
     ("image", []),
     ("keras", []),
     ("matplotlib", []),
+    ("mxnet", []),
     ("numpy", []),
     ("oneflow", []),
     ("onnx", []),
