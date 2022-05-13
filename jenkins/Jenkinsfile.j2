@@ -314,22 +314,18 @@ def build_image(arch_name, image_name) {
 }
 
 if (rebuild_docker_images) {
+  stage('Freeze Python Dependencies') {
+    node('CPU') {
+      timeout(time: max_time, unit: 'MINUTES') {
+        init_git()
+        freeze_python_deps()
+      }
+    }
+  }
+
   stage('Docker Image Build') {
 
     // TODO in a follow up PR: Find ecr tag and use in subsequent builds
-    parallel(
-    {% for arch, img in nodes_by_arch(images) %}
-      {{ ' ' }}'{{ arch }}': {
-        node('{{ img.platform }}') {
-          timeout(time: max_time, unit: 'MINUTES') {
-            init_git()
-            build_base_image('{{ arch }}')
-          }
-        }
-      },
-    {% endfor %}
-    )
-
     parallel(
     {% for image in images %}
       '{{ image.name }}': {
