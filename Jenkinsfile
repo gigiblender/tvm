@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-13T17:18:18.841574
+// Generated at 2022-05-13T17:18:24.432075
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -339,17 +339,17 @@ def freeze_python_deps() {
     )
   } finally {
     archiveArtifacts artifacts: "docker/python/build/**", fingerprint: true
-    pack_lib("${arch_name}-lockfiles", "docker/python/build/**")
+    pack_lib("python-lockfiles", "docker/python/build/**")
   }
 }
 
-def build_image(arch_name, image_name) {
+def build_image(image_name) {
   hash = sh(
     returnStdout: true,
     script: 'git log -1 --format=\'%h\''
   ).trim()
   def full_name = "${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}"
-  unpack_lib("${arch_name}-lockfiles")
+  unpack_lib("python-lockfiles")
   sh(
     script: "${docker_build} ${image_name} --spec ${full_name}",
     label: 'Build docker image'
@@ -417,7 +417,7 @@ if (rebuild_docker_images) {
         node('ARM') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('aarch64', 'ci_arm')
+            build_image('ci_arm')
           }
         }
       },
@@ -425,7 +425,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_cpu')
+            build_image('ci_cpu')
           }
         }
       },
@@ -433,7 +433,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_gpu')
+            build_image('ci_gpu')
           }
         }
       },
@@ -441,7 +441,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_hexagon')
+            build_image('ci_hexagon')
           }
         }
       },
@@ -449,7 +449,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86', 'ci_i386')
+            build_image('ci_i386')
           }
         }
       },
@@ -457,7 +457,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_lint')
+            build_image('ci_lint')
           }
         }
       },
@@ -465,7 +465,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_qemu')
+            build_image('ci_qemu')
           }
         }
       },
@@ -473,7 +473,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('x86_64', 'ci_wasm')
+            build_image('ci_wasm')
           }
         }
       },

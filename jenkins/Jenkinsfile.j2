@@ -256,17 +256,17 @@ def freeze_python_deps() {
     )
   } finally {
     archiveArtifacts artifacts: "docker/python/build/**", fingerprint: true
-    pack_lib("${arch_name}-lockfiles", "docker/python/build/**")
+    pack_lib("python-lockfiles", "docker/python/build/**")
   }
 }
 
-def build_image(arch_name, image_name) {
+def build_image(image_name) {
   hash = sh(
     returnStdout: true,
     script: 'git log -1 --format=\'%h\''
   ).trim()
   def full_name = "${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}"
-  unpack_lib("${arch_name}-lockfiles")
+  unpack_lib("python-lockfiles")
   sh(
     script: "${docker_build} ${image_name} --spec ${full_name}",
     label: 'Build docker image'
@@ -335,7 +335,7 @@ if (rebuild_docker_images) {
         node('{{ image.platform }}') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('{{ image.arch }}', '{{ image.name }}')
+            build_image('{{ image.name }}')
           }
         }
       },

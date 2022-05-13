@@ -34,46 +34,37 @@ data = {
     "images": [
         {
             "name": "ci_arm",
-            "arch": "aarch64",
             "platform": "ARM",
         },
         {
             "name": "ci_cpu",
-            "arch": "x86_64",
             "platform": "CPU",
         },
         {
             "name": "ci_gpu",
-            "arch": "x86_64",
             "platform": "CPU",
         },
         {
             "name": "ci_hexagon",
-            "arch": "x86_64",
             "platform": "CPU",
         },
         {
             "name": "ci_i386",
-            "arch": "x86",
             "platform": "CPU",
         },
         {
             "name": "ci_lint",
-            "arch": "x86_64",
             "platform": "CPU",
         },
         {
             "name": "ci_qemu",
-            "arch": "x86_64",
             "platform": "CPU",
         },
         {
             "name": "ci_wasm",
-            "arch": "x86_64",
             "platform": "CPU",
         },
-    ],
-    'nodes_by_arch': lambda images: dict(sorted([(img['arch'], img) for img in images], key=lambda k: k[0])).items()
+    ]
 }
 
 
