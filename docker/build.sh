@@ -162,28 +162,30 @@ function upsearch () {
         cd .. && upsearch "$1"
 }
 
+# Under Jenkins matrix build, the build tag may contain characters such as
+# commas (,) and equal signs (=), which are not valid inside docker image names.
+# Convert to all lower-case, as per requirement of Docker image names
+function sanitize_docker_name() {
+    echo "$@" | sed -e 's/=/_/g' -e 's/,/-/g' -e 's/\//-/g' | tr '[:upper:]' '[:lower:]'
+}
+
 # Set up WORKSPACE and BUILD_TAG. Jenkins will set them for you or we pick
 # reasonable defaults if you run it outside of Jenkins.
 WORKSPACE="${WORKSPACE:-${SCRIPT_DIR}/../}"
 BUILD_TAG=$(echo "${BUILD_TAG:-tvm}" | sed 's/-/--/g' | sed 's/%/-/g')
-DOCKER_IMAGE_TAG="${DOCKER_IMAGE_TAG:-latest}"
 
 # Determine the docker image name
-DOCKER_IMG_NAME="${BUILD_TAG}.${CONTAINER_TYPE}"
-
-# Under Jenkins matrix build, the build tag may contain characters such as
-# commas (,) and equal signs (=), which are not valid inside docker image names.
-DOCKER_IMG_NAME=$(echo "${DOCKER_IMG_NAME}" | sed -e 's/=/_/g' -e 's/,/-/g')
-
-# Convert to all lower-case, as per requirement of Docker image names
-DOCKER_IMG_NAME=$(echo "${DOCKER_IMG_NAME}" | tr '[:upper:]' '[:lower:]')
+DOCKER_IMG_NAME=$(echo "${BUILD_TAG}.${CONTAINER_TYPE}" | sanitize_docker_name)
+DOCKER_IMAGE_TAG=$(echo "${DOCKER_IMAGE_TAG:-latest}" | sanitize_docker_name)
 
 # Compose the full image spec with "name:tag" e.g. "tvm.ci_cpu:v0.03"
 DOCKER_IMG_SPEC="${DOCKER_IMG_NAME}:${DOCKER_IMAGE_TAG}"
 
 if [[ -n ${OVERRIDE_IMAGE_SPEC+x} ]]; then
-    DOCKER_IMG_SPEC="$OVERRIDE_IMAGE_SPEC"
+    DOCKER_IMG_SPEC=$(echo "$OVERRIDE_IMAGE_SPEC" | sanitize_docker_name)
 fi
+
+DOCKER_IMG_SPEC=
 
 # Print arguments.
 echo "WORKSPACE: ${WORKSPACE}"

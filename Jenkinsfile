@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-17T10:23:30.174515
+// Generated at 2022-05-17T13:48:28.023057
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -428,6 +428,8 @@ def build_image(image_name) {
     script: "docker rmi ${full_name}",
     label: 'Remove docker image'
   )
+
+  return full_name
 }
 
 if (rebuild_docker_images) {
@@ -448,7 +450,7 @@ if (rebuild_docker_images) {
         node('ARM') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_arm')
+            ci_arm = build_image('ci_arm')
           }
         }
       },
@@ -456,7 +458,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_cpu')
+            ci_cpu = build_image('ci_cpu')
           }
         }
       },
@@ -464,7 +466,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_gpu')
+            ci_gpu = build_image('ci_gpu')
           }
         }
       },
@@ -472,7 +474,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_hexagon')
+            ci_hexagon = build_image('ci_hexagon')
           }
         }
       },
@@ -480,7 +482,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_i386')
+            ci_i386 = build_image('ci_i386')
           }
         }
       },
@@ -488,7 +490,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_lint')
+            ci_lint = build_image('ci_lint')
           }
         }
       },
@@ -496,7 +498,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_qemu')
+            ci_qemu = build_image('ci_qemu')
           }
         }
       },
@@ -504,7 +506,7 @@ if (rebuild_docker_images) {
         node('CPU') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('ci_wasm')
+            ci_wasm = build_image('ci_wasm')
           }
         }
       },

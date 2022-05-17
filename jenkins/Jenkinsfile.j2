@@ -345,6 +345,8 @@ def build_image(image_name) {
     script: "docker rmi ${full_name}",
     label: 'Remove docker image'
   )
+
+  return full_name
 }
 
 if (rebuild_docker_images) {
@@ -366,7 +368,7 @@ if (rebuild_docker_images) {
         node('{{ image.platform }}') {
           timeout(time: max_time, unit: 'MINUTES') {
             init_git()
-            build_image('{{ image.name }}')
+            {{ image.name }} = build_image('{{ image.name }}')
           }
         }
       },
