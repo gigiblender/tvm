@@ -166,26 +166,24 @@ function upsearch () {
 # commas (,) and equal signs (=), which are not valid inside docker image names.
 # Convert to all lower-case, as per requirement of Docker image names
 function sanitize_docker_name() {
-    echo "$@" | sed -e 's/=/_/g' -e 's/,/-/g' -e 's/\//-/g' | tr '[:upper:]' '[:lower:]'
+    echo -n "$@" | python3 -c 'import sys; import urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe="").lower())' | tr % -
 }
 
 # Set up WORKSPACE and BUILD_TAG. Jenkins will set them for you or we pick
 # reasonable defaults if you run it outside of Jenkins.
 WORKSPACE="${WORKSPACE:-${SCRIPT_DIR}/../}"
-BUILD_TAG=$(echo "${BUILD_TAG:-tvm}" | sed 's/-/--/g' | sed 's/%/-/g')
+BUILD_TAG=$(sanitize_docker_name "${BUILD_TAG:-tvm}")
 
 # Determine the docker image name
-DOCKER_IMG_NAME=$(echo "${BUILD_TAG}.${CONTAINER_TYPE}" | sanitize_docker_name)
-DOCKER_IMAGE_TAG=$(echo "${DOCKER_IMAGE_TAG:-latest}" | sanitize_docker_name)
+DOCKER_IMG_NAME=${BUILD_TAG}.$(sanitize_docker_name "${CONTAINER_TYPE}")
+DOCKER_IMAGE_TAG=$(sanitize_docker_name "${DOCKER_IMAGE_TAG:-latest}")
 
 # Compose the full image spec with "name:tag" e.g. "tvm.ci_cpu:v0.03"
 DOCKER_IMG_SPEC="${DOCKER_IMG_NAME}:${DOCKER_IMAGE_TAG}"
 
 if [[ -n ${OVERRIDE_IMAGE_SPEC+x} ]]; then
-    DOCKER_IMG_SPEC=$(echo "$OVERRIDE_IMAGE_SPEC" | sanitize_docker_name)
+    DOCKER_IMG_SPEC="${OVERRIDE_IMAGE_SPEC}" #$(sanitize_docker_name "$OVERRIDE_IMAGE_SPEC")
 fi
-
-DOCKER_IMG_SPEC=
 
 # Print arguments.
 echo "WORKSPACE: ${WORKSPACE}"

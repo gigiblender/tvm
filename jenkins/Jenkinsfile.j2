@@ -296,7 +296,11 @@ def build_image(image_name) {
     returnStdout: true,
     script: 'git log -1 --format=\'%h\''
   ).trim()
-  def full_name = "${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}"
+  def full_name = sh(
+    returnStdout: true,
+    script: "echo -n '${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}' | python3 -c 'import sys; import urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=\"\").lower())' | tr % -",
+    label: 'Compute image name',
+  )
   unpack_lib("python-lockfiles", "docker/python/build/**")
   sh(
     script: "${docker_build} ${image_name} --spec ${full_name}",
