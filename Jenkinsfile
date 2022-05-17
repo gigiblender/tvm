@@ -45,7 +45,7 @@
 // 'python3 jenkins/generate.py'
 // Note: This timestamp is here to ensure that updates to the Jenkinsfile are
 // always rebased on main before merging:
-// Generated at 2022-05-13T17:18:31.710370
+// Generated at 2022-05-17T10:23:30.174515
 
 import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
 // NOTE: these lines are scanned by docker/dev_common.sh. Please update the regex as needed. -->
@@ -380,7 +380,7 @@ def build_image(image_name) {
     script: 'git log -1 --format=\'%h\''
   ).trim()
   def full_name = "${image_name}:${env.BRANCH_NAME}-${hash}-${env.BUILD_NUMBER}"
-  unpack_lib("python-lockfiles")
+  unpack_lib("python-lockfiles", "docker/python/build/**")
   sh(
     script: "${docker_build} ${image_name} --spec ${full_name}",
     label: 'Build docker image'
