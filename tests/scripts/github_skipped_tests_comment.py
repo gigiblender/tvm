@@ -143,7 +143,6 @@ if __name__ == "__main__":
 
     remote = git(["config", "--get", f"remote.{args.remote}.url"])
     user, repo = parse_remote(remote)
-    user='apache'
 
     target_url = os.environ["TARGET_URL"]
     pr_and_build = get_pr_and_build_numbers(target_url)
@@ -152,8 +151,10 @@ if __name__ == "__main__":
 
     if not args.dry_run:
         retrieve_test_reports(
-            pr_number=pr_and_build["pr_number"],
-            build_number=pr_and_build["build_number"],
+            # pr_number=pr_and_build["pr_number"],
+            pr_number=12436,
+            # build_number=pr_and_build["build_number"],
+            build_number=1,
             s3_prefix=args.s3_prefix,
             jenkins_prefix=args.jenkins_prefix,
         )
