@@ -143,6 +143,7 @@ if __name__ == "__main__":
 
     remote = git(["config", "--get", f"remote.{args.remote}.url"])
     user, repo = parse_remote(remote)
+    user='apache'
 
     target_url = os.environ["TARGET_URL"]
     pr_and_build = get_pr_and_build_numbers(target_url)
