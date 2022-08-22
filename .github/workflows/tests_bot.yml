@@ -1,9 +1,9 @@
 
-name: docs-bot
+name: tests-bot
 on:
   [status, push]
 jobs:
-  run-docs-bot:
+  run-tests-bot:
 #    if: ${{ github.repository == 'apache/tvm' && github.event.state == 'success' && github.event.context == 'tvm-ci/pr-head' }}
     runs-on: ubuntu-latest
     steps:
