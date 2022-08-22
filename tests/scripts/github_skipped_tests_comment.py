@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
         if comment is not None:
             comment_url = comment["url"]
-            comment_id = comment_url[comment_url.find("comments/"): len(comment_url)]
+            comment_id = comment_url[comment_url.find("comments/"): len(comment_url)].strip("comments/")
             github.patch(f'issues/comments/{comment_id}', {"body": body})
         else:
             github.post(url, {"body": body})
