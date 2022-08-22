@@ -148,7 +148,8 @@ if __name__ == "__main__":
     # pr_and_build = get_pr_and_build_numbers(target_url)
     pr_and_build = {"pr_number": 2, "build_number": 1}
 
-    commit_sha = os.environ["COMMIT_SHA"]
+    # commit_sha = os.environ["COMMIT_SHA"]
+    commit_sha = "commit_sha"
 
     if not args.dry_run:
         retrieve_test_reports(
