@@ -1,10 +1,10 @@
 
 name: docs-bot
 on:
-  status
+  [status, push]
 jobs:
   run-docs-bot:
-    if: ${{ github.repository == 'apache/tvm' && github.event.state == 'success' && github.event.context == 'tvm-ci/pr-head' }}
+#    if: ${{ github.repository == 'apache/tvm' && github.event.state == 'success' && github.event.context == 'tvm-ci/pr-head' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,7 +14,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_RESOURCES_AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-west-2
           COMMIT_SHA: ${{ github.event.sha }}
-          TARGET_URL: ${{ github.event.target_url }}
+          TARGET_URL: 'https://github.com/apache/tvm/pull/PR-12436/1'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -eux
