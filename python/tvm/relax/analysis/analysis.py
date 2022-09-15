@@ -25,6 +25,7 @@ from typing import Dict, List
 
 import tvm
 from tvm.relax.expr import DataflowBlock, Var, Expr, Function, Binding
+from tvm.ir.module import IRModule
 from . import _ffi_api
 
 
@@ -113,3 +114,24 @@ def remove_all_unused(func: Function) -> Function:
         The function with unused variables removed.
     """
     return _ffi_api.remove_all_unused(func)
+
+
+def extract_buffer_info(main_func: Function, mod: IRModule):
+    """This analysis pass consumes an IRModule with a Relax main function
+        that defines a ordering in the callees to operators and produces BufferInfo
+        objects that contains information about tensor allocations and liveness
+        conflicts between allocations.
+
+    Parameters
+    ----------
+    main_func: tvm.relax.Function
+        The main function containing calls to operator PrimFuncs.
+    mod : tvm.ir.IRModule
+        The full IRModule containing all Relax and Prim functions.
+
+    Returns
+    -------
+    Map<relax::Expr, BufferInfo>
+        extracted buffer info objects
+    """
+    return _ffi_api.extract_buffer_info(main_func, mod)
