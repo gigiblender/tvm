@@ -33,3 +33,4 @@ echo set\(USE_RPC OFF\) >> config.cmake
 echo set\(USE_GRAPH_EXECUTOR OFF\) >> config.cmake
 echo set\(USE_PROFILER OFF\) >> config.cmake
 echo set\(USE_AOT_EXECUTOR OFF\) >> config.cmake
+echo set\(USE_MICRO ON\) >> config.cmake

@@ -98,7 +98,7 @@ jobs:
           python -m pytest -v tests/python/all-platform-minimal-test
 
   Windows-Static-Runtime:
-    if: ${{ github.repository == 'apache/tvm' }}
+    if: ${{ github.repository == 'gigiblender/tvm' }}
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
@@ -115,7 +115,7 @@ jobs:
           cmake --build . --config Release --target runtime
 
   Linux-Static-Runtime:
-    if: ${{ github.repository == 'apache/tvm' }}
+    if: ${{ github.repository == 'gigiblender/tvm' }}
     runs-on: Ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
