@@ -371,6 +371,15 @@ def ConvertPoolAllocationsToOffsets(
         pool_allocations, emit_tvmscript_printable, insert_storage_allocations
     )
 
+def UnfoldRelaxTuples() -> tvm.ir.transform.Pass:
+    """Unfold Relax tuple values into multiple Relax variables.
+
+    Returns
+    -------
+    ret : tvm.transform.Pass
+        The registered pass for unfolding Relax tuples.
+    """
+    return _ffi_api.UnfoldRelaxTuples()  # type: ignore
 
 def ConvertRelaxMainToDPS(attach_io_to_attrs: bool = True) -> tvm.ir.transform.Pass:
     return _ffi_api.ConvertRelaxMainToDPS(attach_io_to_attrs)
