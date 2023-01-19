@@ -134,10 +134,58 @@ class MatMul(OnnxOpConverter):
     def _impl_v13(cls, bb, inputs, attr):
         return bb.emit_te(topi.matmul, inputs[0], inputs[1])
 
+class Div(OnnxOpConverter):
+    """Converts an onnx Div node into an equivalent Relax expression."""
+    @classmethod
+    def _impl_v14(cls, bb, inputs, attr):
+        return bb.emit_te(topi.divide, inputs[0], inputs[1])
+
+class Sigmoid(OnnxOpConverter):
+    """Converts an onnx Sigmoid node into an equivalent Relax expression."""
+    @classmethod
+    def _impl_v13(cls, bb, inputs, attr):
+        return bb.emit_te(topi.sigmoid, inputs[0])
+
+
+class Softmax(OnnxOpConverter):
+    """Converts an onnx Softmax node into an equivalent Relax expression."""
+    @classmethod
+    def _impl_v13(cls, bb, inputs, attr):
+        axis = attr.get("axis", -1)
+        return bb.emit_te(topi.nn.softmax, inputs[0], axis=axis)
+
+class Transpose(OnnxOpConverter):
+    """Converts an onnx Transpose node into an equivalent Relax expression."""
+    @classmethod
+    def _impl_v13(cls, bb, inputs, attr):
+        perm = attr.get("perm", None)
+        return bb.emit_te(topi.transpose, inputs[0], axes=perm)
+
+class Unsqueeze(OnnxOpConverter):
+    """Converts an onnx Unsqueeze node into an equivalent Relax expression."""
+    @classmethod
+    def _impl_v13(cls, bb, inputs, attr):
+        input = inputs[0]
+        axes = inputs[1]
+
+        if (isinstance(axes, relax.Constant)):
+            constant_axes = list(axes.data.numpy())
+            constant_axes = list(map(int, constant_axes))
+            constant_axes = sorted(constant_axes)
+            for axis in constant_axes:
+                input = bb.emit_te(topi.expand_dims, input, axis=axis, num_newaxis=1)
+            return input
+
+        raise NotImplementedError("Unsqueeze with dynamic axes is not supported.")
 
 def _get_convert_map(opset):
     return {
         "MatMul": MatMul.get_converter(opset),
+        "Div": Div.get_converter(opset),
+        "Sigmoid": Sigmoid.get_converter(opset),
+        "Softmax": Softmax.get_converter(opset),
+        "Transpose": Transpose.get_converter(opset),
+        "Unsqueeze": Unsqueeze.get_converter(opset),
     }
 
 
