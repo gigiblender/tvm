@@ -26,12 +26,11 @@ import numpy as _np
 import tvm
 from tvm import relax, topi, relay
 from tvm.target import Target
-from tvm.ir import IRModule, transform
+from tvm.ir import IRModule
 from tvm.relax import testing, PyExprMutator
 from tvm._ffi import base as _base
 from tvm.runtime import ndarray as _nd
 from tvm.relay.expr import TupleWrapper, Var, GlobalVar
-from tvm.relay.frontend.onnx import LayerNormalization as RelayLayerNormalization
 from tvm.relay.frontend.onnx import OnnxOpConverter as RelayOnnxOpConverter
 
 
@@ -563,15 +562,14 @@ class Sub(OnnxOpConverter):
 
 def _get_convert_map(opset):
     return {
-        "MatMul": tvm.relay.frontend.onnx.MatMul,
-        # "MatMul": MatMul,
+        "MatMul": MatMul,
         "Concat": Concat,
         "Add": Add,
         "Mul": Mul,
         "Cast": Cast,
         "Gather": Gather,
         "Gemm": Gemm,
-        "Reshape": tvm.relay.frontend.onnx.Reshape,
+        "Reshape": relay.frontend.onnx.Reshape,
         "Div": Div,
         "Sigmoid": Sigmoid,
         "Softmax": Softmax,
@@ -594,7 +592,7 @@ def _get_convert_map(opset):
         "Squeeze": Squeeze,
         "Constant": Constant,
         "Sub": Sub,
-        "LayerNormalization": tvm.relay.frontend.onnx.LayerNormalization,
+        "LayerNormalization": relay.frontend.onnx.LayerNormalization,
     }
 
 
@@ -611,7 +609,7 @@ class GraphProto:
 
     current = None
 
-    def __init__(self, shape, dtype):
+    def __init__(self, shape, dtype, target):
         self._nodes = {}
         self._inputs = {}
         self._num_input = 0
@@ -619,6 +617,7 @@ class GraphProto:
         self._input_names = []
         self._dtype = dtype
         self.opset = None
+        self._target = target
         self.bb = relax.BlockBuilder()
 
     def from_onnx(self, graph, opset) -> IRModule:
@@ -804,6 +803,7 @@ class GraphProto:
         calls into the relay to relax translator to obtain the equivalent Relax.
         Then unpacks the IRModule obtained and adds the TIR funcs and the
         associated call_tirs to the block builder in use.
+
         Parameters
         ----------
         relax_inputs : list(relax.Var, relay.Constant)
@@ -824,12 +824,10 @@ class GraphProto:
         # Create a Relay function with the body returned by the Relay op.
         relay_var_inputs = [input for input in relay_inputs if isinstance(input, relay.Var)]
         function = relay.Function(relay_var_inputs, relay_output)
-        # TODO Should we support passing a target into the frontend?
-        target = Target("llvm")
         # Save the current in-use block builder. The translator uses its own block builder.
         prev_bb = relax.BlockBuilder._current
         relax.BlockBuilder._current = None
-        relax_mod = testing.relay_translator.from_relay(function, target)
+        relax_mod = testing.relay_translator.from_relay(function, self._target)
         # Restore the block builder used by the frontend.
         relax.BlockBuilder._current = prev_bb
 
@@ -846,10 +844,6 @@ class GraphProto:
         for relax_var in relax_inputs:
             if (isinstance(relax_var, relax.Var)):
                 relax_input_dict[relax_var.name_hint] = relax_var
-
-        # from tvm.relax.testing import dump_ast
-        # print(relax_mod["main"])
-        # print(dump_ast(relax_mod["main"]))
 
         @relax.expr_functor.mutator
         class Mapper(PyExprMutator):
@@ -878,7 +872,6 @@ class GraphProto:
 
         return final_binding.value
 
-
     def _convert_operator(self, op_name, inputs, attrs, opset):
         """Convert ONNX operator into a Relax operator.
         The converter must specify conversions explicitly for incompatible name, and
@@ -902,14 +895,13 @@ class GraphProto:
         if op_name in convert_map:
             convert_class = convert_map[op_name]
             op_function = convert_class.get_converter(opset)
-            # If the op_function is a subclass of RelayOnnxOpConverter then it is a relay op.
-            if (convert_class.__bases__[0] == RelayOnnxOpConverter) or \
-                (hasattr(convert_class.__bases__[0], "__bases__") and convert_class.__bases__[0].__bases__[0] == RelayOnnxOpConverter):
+            # If the op_function is a subclass of Relay OnnxOpConverter then it is a relay op.
+            if issubclass(convert_class, RelayOnnxOpConverter):
                 relay_inputs = self._relay_input_adapter(inputs)
                 # The op_function might change the inputs to the relay op. Use a copy of the inputs.
                 relay_inputs_copy = [relay_input for relay_input in relay_inputs]
                 # TODO handle params passing
-                relay_output = op_function(relay_inputs_copy, attrs, [])
+                relay_output = op_function(relay_inputs_copy, attrs, params=[])
                 sym = self._relay_output_adapter(inputs, relay_inputs, relay_output)
             else:
                 sym = op_function(self.bb, inputs, attrs)
@@ -918,7 +910,7 @@ class GraphProto:
         return sym
 
 
-def from_onnx(model, shape=None, dtype="float32", opset=None):
+def from_onnx(model, shape=None, dtype="float32", opset=None, target: Union[str, Target] = "llvm"):
     """Convert a ONNX model into an equivalent Relax Function.
     ONNX graphs are represented as Python Protobuf objects.
     The companion parameters will be handled automatically.
@@ -943,6 +935,8 @@ def from_onnx(model, shape=None, dtype="float32", opset=None):
     opset : int, optional
         Override to autodetected opset.
         This can be helpful for some testing.
+    target : str or Target, optional
+        The compilation target used by the Relay to Relax translator.
 
     Returns
     -------
@@ -963,7 +957,10 @@ def from_onnx(model, shape=None, dtype="float32", opset=None):
                 warnings.warn(str(e))
     except ImportError:
         pass
-    g = GraphProto(shape, dtype)
+
+    if isinstance(target, str):
+        target = Target(target)
+    g = GraphProto(shape, dtype, target)
     graph = model.graph
 
     try:
