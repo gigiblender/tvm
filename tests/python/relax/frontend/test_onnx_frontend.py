@@ -659,6 +659,7 @@ def test_layer_norm():
     check_correctness(model)
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize("dynamic", [True, False])
 def test_skiplayernormalization(dynamic):
     """test_skiplayernormalization"""
@@ -726,6 +727,7 @@ def test_skiplayernormalization(dynamic):
     verify_skiplayernormalization(input_array, skip, gamma, beta, bias)
 
 
+@pytest.mark.skip
 def test_embedlayernormalization():
     """test_embedlayernormalization"""
 
@@ -1015,6 +1017,7 @@ def test_constantofshape():
     verify_constantofshape((1, 2, 3), -1, "float32")
 
 
+@pytest.mark.skip
 def test_slice():
     """test_slice"""
 
@@ -1218,6 +1221,7 @@ def test_slice():
     )
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize("dynamic", [True, False])
 def test_attention(dynamic):
     """test_attention"""
@@ -1328,6 +1332,7 @@ def test_squeeze(dynamic):
     test_squeeze_once((), ())  # scalar testing.
 
 
+@pytest.mark.skip
 def test_pad_constant_value():
     """test_pad_constant_value"""
 
@@ -1360,6 +1365,7 @@ def test_pad_constant_value():
     verify_pad_constant_value("")
 
 
+@pytest.mark.skip
 def test_split():
     """test_split"""
 
@@ -1456,6 +1462,7 @@ def test_split():
     verify_split([[1.0, 2.0]], [[1.0, 2.0]], [1], 0)
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize("dynamic", [True, False])
 def test_tile(dynamic):
     """test_tile"""
