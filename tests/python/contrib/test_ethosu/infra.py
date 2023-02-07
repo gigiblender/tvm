@@ -133,7 +133,7 @@ def create_test_runner(
     ethosu_variant = ethosu_variant.upper()
 
     prologue = """
-    uart_init();
+    UartStdOutInit();
     EthosuInit();
 
     struct ethosu_driver* ethos_u = ethosu_reserve_driver();
@@ -158,7 +158,7 @@ def create_test_runner(
         epilogue="""
         ethosu_release_driver(ethos_u);
         """,
-        includes=["uart.h", "ethosu_55.h", "ethosu_mod.h", "hard_fault.h"],
+        includes=["uart_stdout.h", "ethosu_55.h", "ethosu_mod.h", "hard_fault.h"],
         parameters={
             "ETHOSU_TEST_ROOT": test_root,
             "NPU_MACS": ethosu_macs,
@@ -691,6 +691,9 @@ def make_ethosu_binary_elementwise(
     ifm2_layout="NHWC",
     ofm_layout="NHWC",
     rounding_mode="TFL",
+    use_rescale: bool = False,
+    rescale_scale: int = 0,
+    rescale_shift: int = 0,
 ):
     ethosu_binary_elementwise = ethosu_ops.ethosu_binary_elementwise(
         ifm=ifm,
@@ -714,6 +717,9 @@ def make_ethosu_binary_elementwise(
         ifm_layout=ifm_layout,
         ifm2_layout=ifm2_layout,
         ofm_layout=ofm_layout,
+        use_rescale=use_rescale,
+        rescale_scale=rescale_scale,
+        rescale_shift=rescale_shift,
     )
     return ethosu_binary_elementwise
 

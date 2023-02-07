@@ -2330,19 +2330,49 @@ class PyTorchOpConverter:
 
     def index(self, inputs, input_types):
         data = inputs[0]
-        indices_list = []
+        data_shape = self.infer_type(data).shape
 
-        for indices in inputs[1]:
-            if self.infer_type(indices).dtype == "bool":
+        axes_adv_idx = [i for i, v in enumerate(inputs[1]) if v is not None]
+        axes_rest = [i for i in range(len(data_shape)) if i not in axes_adv_idx]
+
+        # check if the adv_index axes are consecutive
+        # if consecutive, result must be transposed again at the end
+        consecutive = True
+        for curr, nxt in zip(axes_adv_idx[:-1], axes_adv_idx[1:]):
+            if nxt - curr != 1:
+                consecutive = False
+                break
+
+        indices_list = []
+        axes_order = axes_adv_idx + axes_rest
+
+        for i in axes_adv_idx:
+            inp = inputs[1][i]
+            if self.infer_type(inp).dtype == "bool":
                 # adv_index does not support a mask as the index tensor (it will treat 0/1 as
                 # an index rather than a flag).
                 # So we use argwhere to turn the mask into indices, which will also take care
                 # of the dynamism in the indexing by mask.
-                indices_list.append(_op.squeeze(_op.transform.argwhere(indices), axis=[1]))
+                indices_list.append(_op.squeeze(_op.transform.argwhere(inp), axis=[1]))
             else:
-                indices_list.append(indices)
+                indices_list.append(inp)
 
-        return _op.adv_index([data] + indices_list)
+        data_after_adv_index = _op.adv_index([_op.transpose(data, axes=axes_order)] + indices_list)
+
+        if consecutive:
+            num_dims = len(self.infer_type(data_after_adv_index).shape)
+            num_new_dims = num_dims - len(axes_rest)
+
+            axes_final_order = list(range(num_dims))
+            axes_final_order = (
+                axes_final_order[num_new_dims : num_new_dims + axes_adv_idx[0]]
+                + axes_final_order[:num_new_dims]
+                + axes_final_order[num_new_dims + axes_adv_idx[0] :]
+            )
+
+            return _op.transpose(data_after_adv_index, axes=axes_final_order)
+        else:
+            return data_after_adv_index
 
     def meshgrid(self, inputs, input_types):
         data = inputs[0]
@@ -3514,6 +3544,20 @@ class PyTorchOpConverter:
         _, indices = _expr.TupleWrapper(output, 2)
         return indices
 
+    def weight_norm(self, inputs, input_types):
+        weight_v, weight_g = inputs[0], inputs[1]
+        dim = inputs[2]
+        dtype = input_types[0]
+        order = 2.0
+        reci_order = _expr.const(1.0 / order, dtype=dtype)
+        order = _expr.const(order)
+
+        norm_v = _op.power(
+            _op.reduce.sum(_op.power(_op.abs(weight_v), order), axis=dim, exclude=2, keepdims=True),
+            reci_order,
+        )
+        return weight_g * (weight_v / norm_v)
+
     # Operator mappings
     def create_convert_map(self):
         self.convert_map = {
@@ -3781,6 +3825,7 @@ class PyTorchOpConverter:
             "aten::__lshift__": self.make_elemwise("left_shift"),
             "aten::__rshift__": self.make_elemwise("right_shift"),
             "aten::multinomial": self.multinomial,
+            "aten::_weight_norm": self.weight_norm,
         }
 
     def update_convert_map(self, custom_map):

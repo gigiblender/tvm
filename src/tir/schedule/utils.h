@@ -22,6 +22,7 @@
 #include <tvm/arith/analyzer.h>
 #include <tvm/arith/int_set.h>
 #include <tvm/arith/iter_affine_map.h>
+#include <tvm/node/serialization.h>
 #include <tvm/tir/analysis.h>
 #include <tvm/tir/function.h>
 #include <tvm/tir/op.h>
@@ -38,7 +39,6 @@
 
 #include "../../arith/pattern_match.h"
 #include "../../node/attr_registry.h"
-#include "../../printer/text_printer.h"
 #include "../../runtime/thread_storage_scope.h"
 #include "../../support/array.h"
 #include "../../support/nd_int_set.h"
@@ -456,10 +456,12 @@ inline std::unordered_set<std::string> GetBlockNames(const IRModule& mod) {
     std::unordered_set<std::string> block_names;
   };
 
-  auto prim_func = tir::FindEntryFunc(mod, nullptr);
-  BlockNameCollector collector;
-  collector(prim_func->body);
-  return collector.block_names;
+  if (auto prim_func = tir::FindEntryFunc(mod, nullptr)) {
+    BlockNameCollector collector;
+    collector(prim_func->body);
+    return collector.block_names;
+  }
+  return {};
 }
 
 /*! \brief Query if the given block name exists in the module associated with the schedule */

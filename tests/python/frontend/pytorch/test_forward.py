@@ -4034,6 +4034,41 @@ def test_forward_index():
     input_data = torch.rand(input_shape).float()
     verify_model(Index1().eval(), input_data=input_data)
 
+    class Index2(Module):
+        def forward(self, x):
+            return x[None, [2, 2]]
+
+    input_data = torch.rand(input_shape).float()
+    verify_model(Index2().eval(), input_data=input_data)
+
+    class Index3(Module):
+        def forward(self, x):
+            return x[None, [0, 1, 2], 1, [2, 3, 4]]
+
+    input_data = torch.rand(input_shape).float()
+    verify_model(Index3().eval(), input_data=input_data)
+
+    class Index4(Module):
+        def forward(self, x):
+            return x[None, [0, 0], None, np.array([[0], [1], [2]]), None]
+
+    input_data = torch.rand(input_shape).float()
+    verify_model(Index4().eval(), input_data=input_data)
+
+    class Index5(Module):
+        def forward(self, x):
+            return x[None, None, [0, 0], np.array([[0], [1], [2]]), None]
+
+    input_data = torch.rand(input_shape).float()
+    verify_model(Index5().eval(), input_data=input_data)
+
+    class Index6(Module):
+        def forward(self, x):
+            return x[None, 1, None, [1, 2, 3]]
+
+    input_data = torch.rand(input_shape).float()
+    verify_model(Index6().eval(), input_data=input_data)
+
     def test_fn_bool_mask():
         return lambda data, mask: data[0, mask]
 
@@ -5036,6 +5071,30 @@ def test_multinomial():
         cpu_only=True,
         check_correctness=False,
     )
+
+
+def test_weight_norm():
+    """Test for atten::_weight_norm"""
+    in_channels = 32
+    out_channels = 64
+    input_data_conv = torch.rand((1, in_channels, 32, 32)).float()
+
+    conv_wn = torch.nn.utils.weight_norm(torch.nn.Conv2d(in_channels, out_channels, kernel_size=3))
+    verify_model(conv_wn.eval().float(), input_data_conv)
+
+    conv_wn_groups = torch.nn.utils.weight_norm(
+        torch.nn.Conv2d(in_channels, out_channels, kernel_size=3, groups=2)
+    )
+    verify_model(conv_wn_groups.eval().float(), input_data_conv)
+
+    conv_wn = torch.nn.utils.weight_norm(
+        torch.nn.Conv2d(in_channels, out_channels, kernel_size=3), dim=1
+    )
+    verify_model(conv_wn.eval().float(), input_data_conv)
+
+    linear_wn = torch.nn.utils.weight_norm(torch.nn.Linear(in_channels, out_channels))
+    input_data_linear = torch.rand((128, in_channels)).float()
+    verify_model(linear_wn.eval().float(), input_data_linear)
 
 
 @tvm.testing.uses_gpu
