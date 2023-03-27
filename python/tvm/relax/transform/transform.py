@@ -712,6 +712,10 @@ def SplitCallTIRByPattern(patterns, fcodegen) -> tvm.ir.transform.Pass:
     return _ffi_api.SplitCallTIRByPattern(patterns, fcodegen)  # type: ignore
 
 
+def ConvertRelaxMainToDPS(attach_io_to_attrs: bool = True) -> tvm.ir.transform.Pass:
+    return _ffi_api.ConvertRelaxMainToDPS(attach_io_to_attrs)
+
+
 def _wrap_class_function_pass(pass_cls, pass_info):
     """Wrap a python class as function pass."""
 
